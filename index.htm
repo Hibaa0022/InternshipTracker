@@ -1,1 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Internship Tracker</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --primary:#2563eb;
+      --primary-2:#1d4ed8;
+      --success:#16a34a;
+      --warning:#f59e0b;
+      --danger:#dc2626;
+      --purple:#7c3aed;
+      --border:#e5e7eb;
+      --shadow:0 8px 25px rgba(0,0,0,.08);
+      --radius:14px;
+      --header-grad-1:#2563eb;
+      --header-grad-2:#7c3aed;
+      --table-head:#f8fafc;
+      --hover:#f9fbff;
+      --soft:#eef2ff;
+    }
 
+    [data-theme="dark"]{
+      --bg:#0b1220;
+      --card:#111827;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --primary:#3b82f6;
+      --primary-2:#2563eb;
+      --success:#22c55e;
+      --warning:#f59e0b;
+      --danger:#ef4444;
+      --purple:#8b5cf6;
+      --border:#334155;
+      --shadow:0 10px 24px rgba(0,0,0,.35);
+      --header-grad-1:#1e3a8a;
+      --header-grad-2:#5b21b6;
+      --table-head:#0f172a;
+      --hover:#0b1730;
+      --soft:#1e293b;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      transition:background .25s, color .25s;
+    }
+
+    .app{min-height:100vh; display:flex; flex-direction:column;}
+
+    header{
+      position:sticky; top:0; z-index:20;
+      background:linear-gradient(90deg, var(--header-grad-1), var(--header-grad-2));
+      color:#fff;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 22px;
+      gap:12px;
+    }
+
+    .brand{display:flex; align-items:center; gap:10px;}
+    .logo{
+      width:42px; height:42px; border-radius:12px; background:#fff;
+      color:#2563eb; display:grid; place-items:center; font-weight:900;
+      box-shadow: 0 4px 10px rgba(0,0,0,.12);
+    }
+    .brand h1{font-size:1.2rem; margin:0;}
+    .brand small{opacity:.9; display:block; margin-top:2px; font-size:.82rem}
+
+    .hello{
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.22);
+      padding:8px 14px;
+      border-radius:999px;
+      font-size:.92rem;
+      display:flex; align-items:center; gap:8px;
+      backdrop-filter: blur(6px);
+    }
+
+    .nav-wrap{
+      padding:0 22px 16px;
+    }
+    nav{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:14px;
+      padding:8px;
+      backdrop-filter: blur(8px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
+    }
+    .nav-btn{
+      border:0;
+      background:transparent;
+      color:#eef2ff;
+      padding:10px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:700;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      transition:.2s ease;
+    }
+    .nav-btn:hover{
+      background:rgba(255,255,255,.14);
+      transform:translateY(-1px);
+    }
+    .nav-btn.active{
+      background:#fff;
+      color:#1d4ed8;
+      box-shadow:0 4px 12px rgba(0,0,0,.12);
+    }
+
+    main{padding:22px; max-width:1300px; width:100%; margin:0 auto;}
+    .page{display:none}
+    .page.active{display:block}
+
+    .grid{display:grid; gap:14px}
+    .stats-grid{grid-template-columns:repeat(auto-fit,minmax(185px,1fr));}
+    .pro-grid{display:grid; gap:14px; grid-template-columns:2fr 1fr;}
+    @media (max-width:980px){ .pro-grid{grid-template-columns:1fr;} }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      transition:background .25s, border-color .25s;
+    }
+
+    /* AUTH GLASS */
+    .auth-bg{
+      background:
+        radial-gradient(circle at 12% 18%, rgba(59,130,246,.22), transparent 36%),
+        radial-gradient(circle at 88% 80%, rgba(124,58,237,.2), transparent 36%),
+        var(--bg);
+    }
+    .auth-shell{
+      position:relative;
+      width:min(500px,95vw);
+      border-radius:22px;
+      padding:1px;
+      background:linear-gradient(135deg, rgba(255,255,255,.75), rgba(255,255,255,.2));
+      box-shadow:0 20px 45px rgba(37,99,235,.2);
+    }
+    .auth-card{
+      border-radius:21px;
+      padding:22px;
+      background:rgba(255,255,255,.38);
+      border:1px solid rgba(255,255,255,.5);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    [data-theme="dark"] .auth-shell{
+      background:linear-gradient(135deg, rgba(148,163,184,.35), rgba(15,23,42,.45));
+      box-shadow:0 24px 48px rgba(0,0,0,.45);
+    }
+    [data-theme="dark"] .auth-card{
+      background:rgba(15,23,42,.5);
+      border:1px solid rgba(148,163,184,.25);
+    }
+    .auth-logo{
+      width:64px; height:64px; border-radius:16px;
+      background:#fff; color:#2563eb;
+      display:grid; place-items:center;
+      margin:0 auto 10px;
+      font-weight:900; font-size:1.2rem;
+      box-shadow:0 8px 20px rgba(37,99,235,.25);
+    }
+
+    /* Premium Professional Intro */
+    .intro-wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:30px;
+      position:relative;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 12% 20%, rgba(37,99,235,.25), transparent 34%),
+        radial-gradient(circle at 88% 80%, rgba(59,130,246,.20), transparent 35%),
+        linear-gradient(180deg,#eaf2ff 0%, #dce9ff 100%);
+    }
+
+    .bg-orb{
+      position:absolute;
+      border-radius:50%;
+      filter:blur(8px);
+      pointer-events:none;
+      z-index:0;
+      animation: float 8s ease-in-out infinite;
+    }
+    .orb-1{
+      width:280px;height:280px;
+      left:-70px;top:80px;
+      background:radial-gradient(circle, rgba(96,165,250,.55), rgba(96,165,250,0));
+    }
+    .orb-2{
+      width:320px;height:320px;
+      right:-90px;bottom:-30px;
+      background:radial-gradient(circle, rgba(37,99,235,.45), rgba(37,99,235,0));
+      animation-delay:1.2s;
+    }
+
+    @keyframes float{
+      0%,100%{transform:translateY(0px)}
+      50%{transform:translateY(-14px)}
+    }
+
+    .hero-card{
+      width:min(1240px, 95vw);
+      border-radius:30px;
+      border:1px solid rgba(255,255,255,.8);
+      background:linear-gradient(135deg,#f8fbff 0%, #edf4ff 56%, #e4efff 100%);
+      box-shadow:
+        0 20px 50px rgba(30,64,175,.16),
+        0 4px 12px rgba(30,64,175,.08),
+        inset 0 1px 0 rgba(255,255,255,.7);
+      padding:34px 36px;
+      position:relative;
+      overflow:hidden;
+      z-index:1;
+    }
+
+    .hero-card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      border-radius:32px;
+      background:linear-gradient(120deg, rgba(96,165,250,.35), rgba(59,130,246,.05), rgba(37,99,235,.28));
+      z-index:-1;
+      filter:blur(18px);
+      opacity:.6;
+      animation:pulse 4.2s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%,100%{opacity:.45}
+      50%{opacity:.85}
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 430px 1fr;
+      align-items:center;
+      gap:34px;
+    }
+    .hero-left{
+      position:relative;
+      min-height:290px;
+    }
+    .hero-glow{
+      position:absolute;
+      inset:0;
+      border-radius:30px;
+      background:
+        radial-gradient(circle at 34% 34%, rgba(59,130,246,.34), rgba(59,130,246,.08) 48%, transparent 72%);
+      animation:glowMove 5s ease-in-out infinite;
+    }
+    @keyframes glowMove{
+      0%,100%{transform:translate(0,0)}
+      50%{transform:translate(6px,-4px)}
+    }
+
+    .hero-logo-box{
+      position:absolute;
+      left:38px;
+      top:40px;
+      width:220px;
+      height:220px;
+      border-radius:38px;
+      background:#fff;
+      display:grid;
+      place-items:center;
+      box-shadow:
+        0 18px 34px rgba(37,99,235,.20),
+        inset 0 -10px 24px rgba(219,234,254,.9);
+      z-index:2;
+    }
+
+    .logo-inner{
+      width:74%;
+      height:74%;
+      border-radius:30px;
+      background:linear-gradient(145deg,#dbeafe,#eff6ff);
+      border:1px solid rgba(37,99,235,.15);
+      display:grid;
+      place-items:center;
+      color:#1d4ed8;
+      font-size:72px;
+      font-weight:900;
+      letter-spacing:1px;
+      text-shadow:0 2px 10px rgba(37,99,235,.18);
+    }
+
+    .hero-right h1{
+      margin:0;
+      font-size:58px;
+      line-height:1.08;
+      letter-spacing:.2px;
+      color:#0f172a;
+      font-weight:900;
+    }
+    .hero-right p{
+      margin:14px 0 0;
+      font-size:23px;
+      line-height:1.45;
+      color:#334155;
+      font-weight:500;
+      max-width:680px;
+    }
+    .hero-btn-row{
+      margin-top:30px;
+      display:flex;
+      justify-content:flex-start;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .hero-login-btn{
+      border:none;
+      border-radius:14px;
+      padding:14px 26px;
+      font-size:18px;
+      font-weight:800;
+      color:#fff;
+      cursor:pointer;
+      background:linear-gradient(135deg,#2563eb,#1d4ed8);
+      box-shadow:0 10px 24px rgba(37,99,235,.30);
+      transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+      letter-spacing:.2px;
+    }
+    .hero-login-btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 14px 28px rgba(37,99,235,.35);
+      filter:brightness(.98);
+    }
+    .hero-login-btn:active{ transform:translateY(0); }
+
+    .sub-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(37,99,235,.18);
+      color:#1e3a8a;
+      background:rgba(255,255,255,.72);
+      font-size:.9rem;
+      font-weight:700;
+      backdrop-filter: blur(6px);
+    }
+    .sub-chip .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:#3b82f6;
+      box-shadow:0 0 0 6px rgba(59,130,246,.15);
+    }
+
+    @media (max-width:1100px){
+      .hero-grid{grid-template-columns:1fr; gap:18px;}
+      .hero-left{min-height:220px}
+      .hero-logo-box{
+        width:170px;height:170px;left:20px;top:24px;border-radius:30px;
+      }
+      .logo-inner{font-size:52px;border-radius:22px}
+      .hero-right h1{font-size:42px}
+      .hero-right p{font-size:19px}
+    }
+    @media (max-width:600px){
+      .intro-wrap{padding:14px}
+      .hero-card{padding:22px}
+      .hero-right h1{font-size:34px}
+      .hero-right p{font-size:16px}
+      .hero-login-btn{width:100%}
+    }
+
+    .section-title{
+      margin:0 0 12px 0;
+      font-size:1.04rem;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+
+    .stat-head{
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:6px;
+    }
+    .stat-icon{
+      width:40px; height:40px; border-radius:12px; display:grid; place-items:center;
+      font-size:20px; font-weight:700;
+      background:rgba(37,99,235,.12); color:var(--primary);
+    }
+    .stat-title{font-size:.86rem; color:var(--muted)}
+    .stat-value{font-size:1.9rem; font-weight:800; margin-top:6px}
+    .stat-foot{font-size:.78rem; color:var(--muted); margin-top:6px}
+
+    .toolbar{
+      display:flex; flex-wrap:wrap; gap:10px; justify-content:space-between;
+      align-items:center; margin-bottom:14px
+    }
+
+    .btn{
+      border:0; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer;
+    }
+    .btn.primary{background:var(--primary); color:#fff}
+    .btn.success{background:var(--success); color:#fff}
+    .btn.warning{background:var(--warning); color:#fff}
+    .btn.danger{background:var(--danger); color:#fff}
+    .btn.ghost{background:#e8efff; color:#1e3a8a}
+    [data-theme="dark"] .btn.ghost{background:#1e293b;color:#cbd5e1;}
+    .btn:hover{filter:brightness(.96)}
+
+    .mini-stat{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 12px; background:var(--soft);
+      border:1px solid var(--border); border-radius:10px; margin-bottom:8px;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px;
+    }
+
+    .timeline-item{
+      border-left:3px solid var(--primary);
+      padding:8px 10px; margin-bottom:10px; background:var(--soft); border-radius:8px;
+    }
+    .timeline-item small{color:var(--muted)}
+
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:12px}
+    th, td{padding:11px 10px; border-bottom:1px solid var(--border); text-align:left; font-size:.92rem}
+    th{background:var(--table-head); color:var(--text)}
+    tr:hover td{background:var(--hover)}
+
+    .badge{padding:4px 10px; border-radius:999px; font-size:.78rem; font-weight:700; display:inline-block;}
+    .APPLIED{background:rgba(37,99,235,.18); color:#60a5fa}
+    .SHORTLISTED{background:rgba(245,158,11,.2); color:#fbbf24}
+    .INTERVIEW{background:rgba(124,58,237,.2); color:#c4b5fd}
+    .OFFER{background:rgba(22,163,74,.2); color:#86efac}
+    .REJECTED{background:rgba(220,38,38,.2); color:#fca5a5}
+
+    .split{display:grid; gap:14px; grid-template-columns: 2fr 1fr;}
+    @media (max-width:980px){ .split{grid-template-columns:1fr;} }
+
+    .calendar-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
+    .day-head{font-weight:700; font-size:.83rem; color:var(--muted); text-align:center; padding:8px}
+    .day{
+      background:var(--card); border:1px solid var(--border); min-height:96px; border-radius:10px;
+      padding:8px; font-size:.9rem; position:relative;
+      display:flex; flex-direction:column; gap:5px; overflow:hidden;
+    }
+    .day strong{font-size:.92rem}
+    .today{outline:2px solid var(--primary)}
+    .event-chip{
+      font-size:.70rem; padding:2px 6px; border-radius:999px; color:#fff;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; display:block;
+    }
+
+    .list-item{
+      border-left:4px solid var(--primary);
+      padding:10px 12px; border-radius:8px; background:rgba(148,163,184,.12); margin-bottom:10px;
+    }
+
+    .note-grid{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+    .note{
+      position:relative;
+      overflow:hidden;
+      border-radius:18px;
+      padding:18px;
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.3);
+      background:
+        radial-gradient(circle at top right, rgba(124,58,237,.25), transparent 45%),
+        radial-gradient(circle at bottom left, rgba(37,99,235,.2), transparent 40%),
+        linear-gradient(160deg, #ffffff, #eef4ff);
+      transition:transform .2s ease, box-shadow .25s ease, border-color .2s ease;
+      box-shadow:0 10px 24px rgba(37,99,235,.12);
+    }
+    .note:hover{
+      transform:translateY(-4px);
+      box-shadow:0 14px 30px rgba(37,99,235,.18);
+      border-color:rgba(37,99,235,.25);
+    }
+    [data-theme="dark"] .note{
+      background:
+        radial-gradient(circle at top right, rgba(124,58,237,.26), transparent 45%),
+        radial-gradient(circle at bottom left, rgba(37,99,235,.2), transparent 40%),
+        linear-gradient(160deg, #1f2937, #111827);
+      box-shadow:0 12px 26px rgba(0,0,0,.35);
+      border-color:#334155;
+    }
+
+    .note-top{
+      display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+      margin-bottom:8px;
+    }
+    .note-title{
+      margin:0;
+      font-size:1.05rem;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .note-badge{
+      background:rgba(37,99,235,.14);
+      color:#1d4ed8;
+      border:1px solid rgba(37,99,235,.24);
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:.72rem;
+      font-weight:700;
+      white-space:nowrap;
+    }
+    [data-theme="dark"] .note-badge{
+      color:#93c5fd;
+      background:rgba(59,130,246,.2);
+      border-color:#3b82f6;
+    }
+    .note-content{
+      color:var(--muted);
+      line-height:1.45;
+      font-size:.9rem;
+      min-height:58px;
+    }
+    .note-actions{
+      display:flex; gap:8px; margin-top:12px;
+    }
+    .btn.small{padding:8px 10px; font-size:.8rem; border-radius:8px}
+
+    .modal{
+      position:fixed; inset:0; background:rgba(0,0,0,.45); display:none;
+      align-items:center; justify-content:center; z-index:30;
+    }
+    .modal.show{display:flex}
+    .modal-content{
+      width:min(640px,92vw); max-height:88vh; overflow:auto;
+      background:var(--card); border-radius:16px; padding:18px;
+      box-shadow: var(--shadow); border:1px solid var(--border);
+    }
+
+    .field{display:flex; flex-direction:column; gap:6px; margin-bottom:10px}
+    .field input, .field textarea, .field select{
+      border:1px solid var(--border); border-radius:10px; padding:10px; font:inherit;
+      background:transparent; color:var(--text);
+    }
+    .field textarea{min-height:100px; resize:vertical}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    .muted{color:var(--muted)}
+    .empty{padding:20px; text-align:center; color:var(--muted)}
+    .divider{height:1px;background:var(--border);margin:16px 0;}
+
+    .security-box{
+      background:var(--soft);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      margin-bottom:10px;
+    }
+
+    .switch{
+      position:relative; display:inline-block; width:52px; height:28px; vertical-align:middle;
+    }
+    .switch input{display:none;}
+    .slider{
+      position:absolute; cursor:pointer; inset:0; background:#cbd5e1; transition:.25s; border-radius:999px;
+    }
+    .slider:before{
+      content:""; position:absolute; height:22px; width:22px; left:3px; top:3px; background:white; transition:.25s; border-radius:50%;
+    }
+    input:checked + .slider{background:var(--success);}
+    input:checked + .slider:before{transform:translateX(24px);}
+  </style>
+</head>
+<body>
+
+  <!-- Intro page -->
+  <div id="introPage" class="intro-wrap">
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+
+    <div class="hero-card">
+      <div class="hero-grid">
+        <div class="hero-left">
+          <div class="hero-glow"></div>
+          <div class="hero-logo-box">
+            <div class="logo-inner">IT</div>
+          </div>
+        </div>
+        <div class="hero-right">
+          <h1>Internship Tracker</h1>
+          <p>Track applications professionally, stay organized, and move confidently toward your next internship offer.</p>
+          <div class="hero-btn-row">
+            <button id="goToLoginBtn" class="hero-login-btn">Get Started</button>
+            <span class="sub-chip"><span class="dot"></span>Smart • Clean • Career-Focused</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth -->
+  <div id="authContainer" class="auth-bg" style="min-height:100vh;display:none;align-items:center;justify-content:center;padding:20px;">
+    <div class="auth-shell">
+      <div class="auth-card">
+        <div style="text-align:center;margin-bottom:14px;">
+          <div class="auth-logo">IT</div>
+          <h2 style="margin:0;">Welcome to Internship Tracker</h2>
+          <p class="muted" style="margin:6px 0 0;">Login or create your account to continue</p>
+        </div>
+
+        <div id="loginFormWrap">
+          <h3 style="margin:8px 0 12px;">Login</h3>
+          <div class="field"><label>Email</label><input id="loginEmail" type="email" placeholder="you@example.com"></div>
+          <div class="field"><label>Password</label><input id="loginPassword" type="password" placeholder="Enter password"></div>
+          <button class="btn primary" id="loginSubmitBtn" style="width:100%;">Login</button>
+          <p class="muted" style="margin-top:10px;text-align:center;">
+            Don’t have an account?
+            <a href="#" id="showSignupLink">Sign Up</a>
+          </p>
+        </div>
+
+        <div id="signupFormWrap" style="display:none;">
+          <h3 style="margin:8px 0 12px;">Sign Up / Register</h3>
+          <div class="field"><label>Full Name</label><input id="signupName" placeholder="Your full name"></div>
+          <div class="field"><label>Email</label><input id="signupEmail" type="email" placeholder="you@example.com"></div>
+          <div class="field"><label>Password</label><input id="signupPassword" type="password" placeholder="Min 6 characters"></div>
+          <div class="field"><label>Confirm Password</label><input id="signupConfirmPassword" type="password" placeholder="Re-enter password"></div>
+          <button class="btn success" id="signupSubmitBtn" style="width:100%;">Create Account</button>
+          <p class="muted" style="margin-top:10px;text-align:center;">
+            Already have an account?
+            <a href="#" id="showLoginLink">Login</a>
+          </p>
+        </div>
+
+        <div id="authMessage" class="muted" style="margin-top:10px;text-align:center;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div class="app" id="mainApp" style="display:none;">
+    <header>
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo">IT</div>
+          <div>
+            <h1>Internship Tracker</h1>
+            <small>Track smart. Apply better. Get hired.</small>
+          </div>
+        </div>
+        <div class="hello">
+          <span>👋</span>
+          <span>Hello, <strong id="userName">Hiba Zulfiqar</strong></span>
+        </div>
+      </div>
+
+      <div class="nav-wrap">
+        <nav>
+          <button class="nav-btn active" data-page="dashboard">🏠 Dashboard</button>
+          <button class="nav-btn" data-page="applications">📋 Applications</button>
+          <button class="nav-btn" data-page="calendar">📅 Calendar</button>
+          <button class="nav-btn" data-page="notes">📝 Notes</button>
+          <button class="nav-btn" data-page="settings">⚙️ Settings</button>
+          <button class="nav-btn" id="logoutBtn">🚪 Logout</button>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="page active" id="dashboard">
+        <div class="toolbar">
+          <h2 style="margin:0">Dashboard Overview</h2>
+        </div>
+        <div class="grid stats-grid" id="statCards"></div>
+        <div class="pro-grid" style="margin-top:14px">
+          <div class="card">
+            <h3 class="section-title">Recent Activity</h3>
+            <div id="recentActivity"></div>
+          </div>
+          <div class="card">
+            <h3 class="section-title">Status Distribution</h3>
+            <div id="statusDist"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="applications">
+        <div class="toolbar">
+          <h2>My Applications</h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn success" id="addAppBtn">+ Add Application</button>
+            <button class="btn ghost" id="refreshAppBtn">Refresh</button>
+          </div>
+        </div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th><th>Company</th><th>Role</th><th>Platform</th><th>Applied</th><th>Deadline</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="appTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="page" id="calendar">
+        <div class="toolbar">
+          <h2>Calendar & Events</h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn ghost" id="prevMonth">←</button>
+            <button class="btn ghost" id="todayBtn">Today</button>
+            <button class="btn ghost" id="nextMonth">→</button>
+            <button class="btn primary" id="addEventBtn">+ Add Event</button>
+          </div>
+        </div>
+        <div class="split">
+          <div class="card">
+            <h3 id="monthTitle"></h3>
+            <div class="calendar-grid" id="calendarGrid"></div>
+          </div>
+          <div class="card">
+            <h3>Upcoming Events</h3>
+            <div id="eventsList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="notes">
+        <div class="toolbar">
+          <h2>My Notes</h2>
+          <button class="btn primary" id="addNoteBtn">+ New Note</button>
+        </div>
+        <div class="grid note-grid" id="notesGrid"></div>
+      </section>
+
+      <section class="page" id="settings">
+        <h2>Settings</h2>
+        <div class="card">
+          <h3 class="section-title">Profile</h3>
+          <div class="field"><label>Name</label><input id="setName"></div>
+          <div class="field"><label>Email</label><input id="setEmail"></div>
+
+          <div class="divider"></div>
+
+          <h3 class="section-title">Appearance</h3>
+          <div class="field">
+            <label>Theme</label>
+            <select id="themeSel">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3 class="section-title">Security</h3>
+          <div class="security-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+              <div>
+                <strong>Two-Factor Authentication (2FA)</strong><br>
+                <span class="muted" style="font-size:.86rem">Add an extra verification step to secure your account.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="twoFaToggle">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div id="twoFaPanel" style="margin-top:12px;display:none;">
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn ghost" id="send2faCodeBtn">Send Verification Code</button>
+              </div>
+              <div class="field" style="margin-top:10px;">
+                <label>Enter 6-digit code</label>
+                <input id="twoFaCodeInput" placeholder="e.g. 123456" maxlength="6">
+              </div>
+              <button class="btn primary" id="verify2faBtn">Verify & Activate 2FA</button>
+              <div class="muted" id="twoFaMsg" style="margin-top:8px;font-size:.86rem;"></div>
+            </div>
+          </div>
+
+          <div class="field"><label>Current Password</label><input type="password" id="currentPass" placeholder="Enter current password"></div>
+          <div class="field"><label>New Password</label><input type="password" id="newPass" placeholder="Min 6 characters"></div>
+          <div class="field"><label>Confirm New Password</label><input type="password" id="confirmPass" placeholder="Re-enter new password"></div>
+          <button class="btn warning" id="updatePasswordBtn">Update Password</button>
+
+          <div class="divider"></div>
+
+          <button class="btn primary" id="saveSettingsBtn">Save Settings</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+
+  <div class="modal" id="logoutModal">
+    <div class="modal-content" style="max-width:460px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(220,38,38,.12);color:#dc2626;font-size:20px;">🚪</div>
+        <h3 style="margin:0;">Confirm Logout</h3>
+      </div>
+      <p class="muted" style="margin-top:8px;">
+        Are you sure you want to logout? You’ll need to sign in again to continue.
+      </p>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
+        <button class="btn ghost" id="cancelLogoutBtn">Cancel</button>
+        <button class="btn danger" id="confirmLogoutBtn">Yes, Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      user: {name:"Hiba Zulfiqar", email:"hiba.z@example.com", password:"password123"},
+      security: { twoFAEnabled: false, pendingCode: null, verified: false },
+      apps: [
+        {id:1, company:"Google", role:"Software Engineer Intern", platform:"LinkedIn", appliedDate:"2026-01-10", deadline:"2026-01-20", status:"APPLIED"},
+        {id:2, company:"Microsoft", role:"Backend Intern", platform:"Company Website", appliedDate:"2026-01-12", deadline:"2026-01-22", status:"SHORTLISTED"},
+        {id:3, company:"Amazon", role:"Data Analyst Intern", platform:"LinkedIn", appliedDate:"2026-01-09", deadline:"2026-01-19", status:"INTERVIEW"},
+        {id:4, company:"Stripe", role:"SWE Intern", platform:"Website", appliedDate:"2026-01-18", deadline:"2026-02-01", status:"OFFER"},
+        {id:5, company:"Meta", role:"Frontend Intern", platform:"Referral", appliedDate:"2026-01-15", deadline:"2026-01-29", status:"REJECTED"}
+      ],
+      events: [
+        {title:"Interview - Google", date:"2026-04-25", time:"2:00 PM", color:"#3b82f6"},
+        {title:"Deadline - Microsoft", date:"2026-04-28", time:"11:59 PM", color:"#ef4444"},
+        {title:"Follow-up - Amazon", date:"2026-04-30", time:"10:00 AM", color:"#8b5cf6"}
+      ],
+      notes: [
+        {id:1, title:"Interview Tips", content:"Prepare STAR stories and revise projects.", tag:"Interview"},
+        {id:2, title:"Companies to Apply", content:"Meta, Apple, Stripe, NVIDIA.", tag:"Plan"},
+        {id:3, title:"Resume Checklist", content:"Update summary, projects, impact metrics, and ATS keywords.", tag:"Resume"}
+      ],
+      currentMonth: new Date()
+    };
+
+    const $ = s => document.querySelector(s);
+    const pad = n => String(n).padStart(2,"0");
+    const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const formatDate = iso => new Date(iso + "T00:00:00").toLocaleDateString(undefined,{month:"short", day:"2-digit", year:"numeric"});
+
+    const savedTheme = localStorage.getItem("it_theme") || "light";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    // AUTH
+    const introPage = document.getElementById("introPage");
+    const authContainer = document.getElementById("authContainer");
+    const mainApp = document.getElementById("mainApp");
+    const authMessage = document.getElementById("authMessage");
+
+    function showAuthMessage(msg, ok=false){
+      authMessage.textContent = msg;
+      authMessage.style.color = ok ? "var(--success)" : "var(--danger)";
+    }
+
+    function getRegisteredUser(){
+      try{ return JSON.parse(localStorage.getItem("it_registered_user") || "null"); }
+      catch{ return null; }
+    }
+    function saveRegisteredUser(user){ localStorage.setItem("it_registered_user", JSON.stringify(user)); }
+    function setLoggedIn(flag){ localStorage.setItem("it_logged_in", flag ? "1" : "0"); }
+    function isLoggedIn(){ return localStorage.getItem("it_logged_in") === "1"; }
+
+    function switchToSignup(){
+      document.getElementById("loginFormWrap").style.display = "none";
+      document.getElementById("signupFormWrap").style.display = "block";
+      showAuthMessage("");
+    }
+    function switchToLogin(){
+      document.getElementById("signupFormWrap").style.display = "none";
+      document.getElementById("loginFormWrap").style.display = "block";
+      showAuthMessage("");
+    }
+
+    document.getElementById("goToLoginBtn").addEventListener("click", () => {
+      introPage.style.display = "none";
+      authContainer.style.display = "flex";
+      switchToLogin();
+    });
+
+    document.getElementById("showSignupLink").addEventListener("click", e => {
+      e.preventDefault();
+      switchToSignup();
+    });
+
+    document.getElementById("showLoginLink").addEventListener("click", e => {
+      e.preventDefault();
+      switchToLogin();
+    });
+
+    document.getElementById("signupSubmitBtn").addEventListener("click", () => {
+      const name = document.getElementById("signupName").value.trim();
+      const email = document.getElementById("signupEmail").value.trim().toLowerCase();
+      const password = document.getElementById("signupPassword").value;
+      const confirm = document.getElementById("signupConfirmPassword").value;
+
+      if(!name || !email || !password || !confirm){ showAuthMessage("Please fill all sign up fields."); return; }
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showAuthMessage("Please enter a valid email address."); return; }
+      if(password.length < 6){ showAuthMessage("Password must be at least 6 characters."); return; }
+      if(password !== confirm){ showAuthMessage("Passwords do not match."); return; }
+
+      saveRegisteredUser({ name, email, password });
+      showAuthMessage("Account created successfully. Please login.", true);
+      switchToLogin();
+      document.getElementById("loginEmail").value = email;
+    });
+
+    document.getElementById("loginSubmitBtn").addEventListener("click", () => {
+      const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+      const password = document.getElementById("loginPassword").value;
+      if(!email || !password){ showAuthMessage("Please enter email and password."); return; }
+
+      const reg = getRegisteredUser();
+      if(!reg){ showAuthMessage("No account found. Please sign up first."); return; }
+      if(reg.email !== email || reg.password !== password){ showAuthMessage("Invalid email or password."); return; }
+
+      state.user.name = reg.name;
+      state.user.email = reg.email;
+      state.user.password = reg.password;
+      document.getElementById("setName").value = state.user.name;
+      document.getElementById("setEmail").value = state.user.email;
+      document.getElementById("userName").textContent = state.user.name;
+
+      setLoggedIn(true);
+      introPage.style.display = "none";
+      authContainer.style.display = "none";
+      mainApp.style.display = "flex";
+      showAuthMessage("");
+    });
+
+    function bootstrapAuth(){
+      if(isLoggedIn()){
+        const reg = getRegisteredUser();
+        if(reg){
+          state.user.name = reg.name;
+          state.user.email = reg.email;
+          state.user.password = reg.password;
+          document.getElementById("setName").value = state.user.name;
+          document.getElementById("setEmail").value = state.user.email;
+          document.getElementById("userName").textContent = state.user.name;
+        }
+        introPage.style.display = "none";
+        authContainer.style.display = "none";
+        mainApp.style.display = "flex";
+      }else{
+        introPage.style.display = "flex";
+        authContainer.style.display = "none";
+        mainApp.style.display = "none";
+        switchToLogin();
+      }
+    }
+
+    // Navigation
+    document.querySelectorAll(".nav-btn[data-page]").forEach(btn=>{
+      btn.onclick=()=>{
+        document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+        $("#"+btn.dataset.page).classList.add("active");
+      };
+    });
+
+    // Dashboard
+    function statCard(title, value, icon, color, note){
+      return `
+        <div class="card">
+          <div class="stat-head">
+            <div class="stat-title">${title}</div>
+            <div class="stat-icon" style="background:${color}22;color:${color}">${icon}</div>
+          </div>
+          <div class="stat-value">${value}</div>
+          <div class="stat-foot">${note || ""}</div>
+        </div>
+      `;
+    }
+
+    function renderStatusDistribution(){
+      const map = { APPLIED:"#3b82f6", SHORTLISTED:"#f59e0b", INTERVIEW:"#8b5cf6", OFFER:"#16a34a", REJECTED:"#dc2626" };
+      const statuses = ["APPLIED","SHORTLISTED","INTERVIEW","OFFER","REJECTED"];
+      const wrap = $("#statusDist");
+      wrap.innerHTML = "";
+      statuses.forEach(s=>{
+        const count = state.apps.filter(a=>a.status===s).length;
+        const row = document.createElement("div");
+        row.className = "mini-stat";
+        row.innerHTML = `<div><span class="dot" style="background:${map[s]}"></span>${s}</div><strong>${count}</strong>`;
+        wrap.appendChild(row);
+      });
+    }
+
+    function renderRecentActivity(){
+      const wrap = $("#recentActivity");
+      const recentApps = [...state.apps].slice(0,4);
+      if(!recentApps.length){
+        wrap.innerHTML = `<div class="muted">No recent activity yet.</div>`;
+        return;
+      }
+      wrap.innerHTML = recentApps.map(a=>`
+        <div class="timeline-item">
+          <strong>${a.company}</strong> — ${a.role}<br>
+          <small>Status: ${a.status} • Applied: ${formatDate(a.appliedDate)}</small>
+        </div>
+      `).join("");
+    }
+
+    function renderStats(){
+      const c = {
+        total: state.apps.length,
+        APPLIED: state.apps.filter(a=>a.status==="APPLIED").length,
+        SHORTLISTED: state.apps.filter(a=>a.status==="SHORTLISTED").length,
+        INTERVIEW: state.apps.filter(a=>a.status==="INTERVIEW").length,
+        OFFER: state.apps.filter(a=>a.status==="OFFER").length,
+        REJECTED: state.apps.filter(a=>a.status==="REJECTED").length
+      };
+
+      $("#statCards").innerHTML = [
+        statCard("Total", c.total, "📊", "#2563eb","All tracked applications"),
+        statCard("Applied", c.APPLIED, "📝", "#3b82f6","Submitted"),
+        statCard("Shortlisted", c.SHORTLISTED, "✅", "#f59e0b","Screening passed"),
+        statCard("Interview", c.INTERVIEW, "🎯", "#7c3aed","Interview stage"),
+        statCard("Offer", c.OFFER, "🏆", "#16a34a","Received offers"),
+        statCard("Rejected", c.REJECTED, "❌", "#dc2626","Not selected")
+      ].join("");
+
+      renderStatusDistribution();
+      renderRecentActivity();
+    }
+
+    // Applications
+    function renderApps(){
+      const body = $("#appTableBody");
+      body.innerHTML = "";
+      state.apps.forEach(app=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${app.id}</td>
+          <td>${app.company}</td>
+          <td>${app.role}</td>
+          <td>${app.platform || "N/A"}</td>
+          <td>${formatDate(app.appliedDate)}</td>
+          <td>${app.deadline ? formatDate(app.deadline) : "N/A"}</td>
+          <td><span class="badge ${app.status}">${app.status}</span></td>
+          <td>
+            <button class="btn ghost" onclick="updateStatus(${app.id})">Update</button>
+            <button class="btn danger" onclick="deleteApp(${app.id})">Delete</button>
+          </td>
+        `;
+        body.appendChild(tr);
+      });
+      renderStats();
+    }
+
+    $("#addAppBtn").onclick = ()=>openModal(`
+      <h3>Add Application</h3>
+      <div class="field"><label>Company</label><input id="mCompany"></div>
+      <div class="field"><label>Role</label><input id="mRole"></div>
+      <div class="field"><label>Platform</label><input id="mPlatform"></div>
+      <div class="row">
+        <div class="field"><label>Applied Date</label><input id="mApplied" type="date" value="${toISO(new Date())}"></div>
+        <div class="field"><label>Deadline</label><input id="mDeadline" type="date"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn success" onclick="saveApp()">Save</button>
+      </div>
+    `);
+
+    function saveApp(){
+      const company = $("#mCompany").value.trim();
+      const role = $("#mRole").value.trim();
+      if(!company || !role){ alert("Company and Role required."); return; }
+      state.apps.unshift({
+        id: state.apps.length ? Math.max(...state.apps.map(a=>a.id))+1 : 1,
+        company, role,
+        platform: $("#mPlatform").value.trim(),
+        appliedDate: $("#mApplied").value || toISO(new Date()),
+        deadline: $("#mDeadline").value || "",
+        status:"APPLIED"
+      });
+      closeModal();
+      renderApps();
+    }
+
+    function updateStatus(id){
+      const app = state.apps.find(a=>a.id===id);
+      openModal(`
+        <h3>Update Status</h3>
+        <div class="field">
+          <label>Status</label>
+          <select id="mStatus">
+            ${["APPLIED","SHORTLISTED","INTERVIEW","OFFER","REJECTED"].map(s=>`<option ${app.status===s?"selected":""}>${s}</option>`).join("")}
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn ghost" onclick="closeModal()">Cancel</button>
+          <button class="btn primary" onclick="saveStatus(${id})">Update</button>
+        </div>
+      `);
+    }
+
+    function saveStatus(id){
+      state.apps.find(a=>a.id===id).status = $("#mStatus").value;
+      closeModal();
+      renderApps();
+    }
+
+    function deleteApp(id){
+      if(!confirm("Delete this application?")) return;
+      state.apps = state.apps.filter(a=>a.id!==id);
+      renderApps();
+    }
+
+    $("#refreshAppBtn").onclick = renderApps;
+
+    // Calendar
+    function getEventsOnDate(isoDate){
+      return state.events.filter(e => e.date === isoDate);
+    }
+
+    function renderCalendar(){
+      const d = state.currentMonth;
+      const y = d.getFullYear(), m = d.getMonth();
+      $("#monthTitle").textContent = d.toLocaleDateString(undefined,{month:"long", year:"numeric"});
+      const grid = $("#calendarGrid");
+      grid.innerHTML = "";
+
+      ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(day=>{
+        const el = document.createElement("div");
+        el.className="day-head";
+        el.textContent=day;
+        grid.appendChild(el);
+      });
+
+      const first = new Date(y,m,1).getDay();
+      const days = new Date(y,m+1,0).getDate();
+      for(let i=0;i<first;i++) grid.appendChild(document.createElement("div"));
+
+      const todayIso = toISO(new Date());
+      for(let day=1; day<=days; day++){
+        const cellDate = `${y}-${pad(m+1)}-${pad(day)}`;
+        const events = getEventsOnDate(cellDate);
+
+        const cell = document.createElement("div");
+        cell.className = "day"+(cellDate===todayIso ? " today":"");
+        cell.innerHTML = `<strong>${day}</strong>`;
+
+        events.slice(0,2).forEach(ev=>{
+          const chip = document.createElement("span");
+          chip.className = "event-chip";
+          chip.style.background = ev.color || "#3b82f6";
+          chip.title = `${ev.title} • ${ev.time || ""}`;
+          chip.textContent = ev.title;
+          cell.appendChild(chip);
+        });
+
+        if(events.length > 2){
+          const more = document.createElement("span");
+          more.className = "muted";
+          more.style.fontSize = ".72rem";
+          more.textContent = `+${events.length - 2} more`;
+          cell.appendChild(more);
+        }
+
+        grid.appendChild(cell);
+      }
+
+      const list = $("#eventsList");
+      list.innerHTML = "";
+      [...state.events].sort((a,b)=>a.date.localeCompare(b.date)).forEach(ev=>{
+        const it = document.createElement("div");
+        it.className = "list-item";
+        it.style.borderLeftColor = ev.color || "#2563eb";
+        it.innerHTML = `<strong>${ev.title}</strong><br><span class="muted">${formatDate(ev.date)} • ${ev.time||""}</span>`;
+        list.appendChild(it);
+      });
+      if(!state.events.length) list.innerHTML = `<div class="empty">No events</div>`;
+    }
+
+    $("#prevMonth").onclick = ()=>{ state.currentMonth.setMonth(state.currentMonth.getMonth()-1); renderCalendar(); };
+    $("#nextMonth").onclick = ()=>{ state.currentMonth.setMonth(state.currentMonth.getMonth()+1); renderCalendar(); };
+    $("#todayBtn").onclick = ()=>{ state.currentMonth = new Date(); renderCalendar(); };
+
+    $("#addEventBtn").onclick = ()=>openModal(`
+      <h3>Add Event</h3>
+      <div class="field"><label>Title</label><input id="eTitle"></div>
+      <div class="row">
+        <div class="field"><label>Date</label><input type="date" id="eDate" value="${toISO(new Date())}"></div>
+        <div class="field"><label>Time</label><input id="eTime" value="2:00 PM"></div>
+      </div>
+      <div class="field"><label>Color</label><input id="eColor" type="color" value="#3b82f6"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn primary" onclick="saveEvent()">Add</button>
+      </div>
+    `);
+
+    function saveEvent(){
+      const title = $("#eTitle").value.trim(), date = $("#eDate").value;
+      if(!title || !date){ alert("Title and date required."); return; }
+      state.events.push({title, date, time:$("#eTime").value.trim(), color:$("#eColor").value});
+      closeModal();
+      renderCalendar();
+    }
+
+    // Notes
+    function renderNotes(){
+      const grid = $("#notesGrid");
+      grid.innerHTML = "";
+      if(!state.notes.length){
+        grid.innerHTML = `<div class="card empty">No notes yet.</div>`;
+        return;
+      }
+
+      state.notes.forEach(n=>{
+        const c = document.createElement("div");
+        c.className = "note";
+        c.innerHTML = `
+          <div class="note-top">
+            <h4 class="note-title">${n.title || "Untitled"}</h4>
+            <span class="note-badge">${n.tag || "General"}</span>
+          </div>
+          <div class="note-content">${(n.content || "").slice(0,145)}${(n.content||"").length>145?"...":""}</div>
+          <div class="note-actions">
+            <button class="btn ghost small" onclick="viewNote(${n.id})">View</button>
+            <button class="btn danger small" onclick="deleteNote(${n.id})">Delete</button>
+          </div>
+        `;
+        grid.appendChild(c);
+      });
+    }
+
+    $("#addNoteBtn").onclick = ()=>openModal(`
+      <h3>New Note</h3>
+      <div class="field"><label>Title</label><input id="nTitle"></div>
+      <div class="field"><label>Tag (optional)</label><input id="nTag" placeholder="e.g. Interview, Plan, Resume"></div>
+      <div class="field"><label>Content</label><textarea id="nContent"></textarea></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn primary" onclick="saveNote()">Save</button>
+      </div>
+    `);
+
+    function saveNote(){
+      const title=$("#nTitle").value.trim();
+      const content=$("#nContent").value.trim();
+      const tag=$("#nTag").value.trim();
+      if(!title && !content){ alert("Please add title or content."); return; }
+      state.notes.unshift({id: Date.now(), title, content, tag: tag || "General"});
+      closeModal();
+      renderNotes();
+    }
+
+    function viewNote(id){
+      const n = state.notes.find(x=>x.id===id);
+      openModal(`
+        <h3>${n.title || "Untitled"}</h3>
+        <p><span class="note-badge">${n.tag || "General"}</span></p>
+        <p style="white-space:pre-wrap">${n.content || ""}</p>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn ghost" onclick="closeModal()">Close</button>
+        </div>
+      `);
+    }
+
+    function deleteNote(id){
+      if(!confirm("Delete this note?")) return;
+      state.notes = state.notes.filter(n=>n.id!==id);
+      renderNotes();
+    }
+
+    // Settings
+    $("#setName").value = state.user.name;
+    $("#setEmail").value = state.user.email;
+    $("#themeSel").value = savedTheme;
+
+    $("#saveSettingsBtn").onclick = ()=>{
+      state.user.name = $("#setName").value.trim() || state.user.name;
+      state.user.email = $("#setEmail").value.trim() || state.user.email;
+      $("#userName").textContent = state.user.name;
+
+      const selectedTheme = $("#themeSel").value;
+      document.documentElement.setAttribute("data-theme", selectedTheme);
+      localStorage.setItem("it_theme", selectedTheme);
+
+      const reg = getRegisteredUser();
+      if(reg){
+        reg.name = state.user.name;
+        reg.email = state.user.email;
+        saveRegisteredUser(reg);
+      }
+
+      alert("Settings saved successfully.");
+    };
+
+    $("#updatePasswordBtn").onclick = ()=>{
+      const current = $("#currentPass").value;
+      const next = $("#newPass").value;
+      const confirm = $("#confirmPass").value;
+
+      if(!current || !next || !confirm){ alert("Please fill all password fields."); return; }
+      if(current !== state.user.password){ alert("Current password is incorrect."); return; }
+      if(next.length < 6){ alert("New password must be at least 6 characters."); return; }
+      if(next !== confirm){ alert("New password and confirm password do not match."); return; }
+      if(next === current){ alert("New password must be different from current password."); return; }
+
+      state.user.password = next;
+      const reg = getRegisteredUser();
+      if(reg){ reg.password = next; saveRegisteredUser(reg); }
+
+      $("#currentPass").value = "";
+      $("#newPass").value = "";
+      $("#confirmPass").value = "";
+      alert("Password updated successfully.");
+    };
+
+    // 2FA
+    const twoFaToggle = $("#twoFaToggle");
+    const twoFaPanel = $("#twoFaPanel");
+    const twoFaMsg = $("#twoFaMsg");
+
+    function set2faUI(){
+      twoFaToggle.checked = state.security.twoFAEnabled;
+      twoFaPanel.style.display = state.security.twoFAEnabled ? "block" : "none";
+      if(!state.security.twoFAEnabled){
+        state.security.pendingCode = null;
+        state.security.verified = false;
+        $("#twoFaCodeInput").value = "";
+        twoFaMsg.textContent = "2FA is currently turned off.";
+      }else{
+        twoFaMsg.textContent = state.security.verified
+          ? "2FA is active and verified."
+          : "2FA is ON. Please verify to complete activation.";
+      }
+    }
+
+    twoFaToggle.addEventListener("change", ()=>{
+      state.security.twoFAEnabled = twoFaToggle.checked;
+      state.security.verified = false;
+      set2faUI();
+    });
+
+    $("#send2faCodeBtn").onclick = ()=>{
+      if(!state.security.twoFAEnabled){ alert("Enable 2FA first."); return; }
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      state.security.pendingCode = code;
+      twoFaMsg.textContent = `Verification code sent ✅ (Demo code: ${code})`;
+    };
+
+    $("#verify2faBtn").onclick = ()=>{
+      const input = $("#twoFaCodeInput").value.trim();
+      if(!state.security.pendingCode){
+        twoFaMsg.textContent = "Please send a verification code first.";
+        return;
+      }
+      if(input === state.security.pendingCode){
+        state.security.verified = true;
+        state.security.pendingCode = null;
+        $("#twoFaCodeInput").value = "";
+        twoFaMsg.textContent = "2FA verified successfully and active 🎉";
+      }else{
+        twoFaMsg.textContent = "Invalid code. Please try again.";
+      }
+    };
+
+    // Modal
+    function openModal(html){ $("#modalContent").innerHTML = html; $("#modal").classList.add("show"); }
+    function closeModal(){ $("#modal").classList.remove("show"); }
+    $("#modal").addEventListener("click", e=>{ if(e.target.id==="modal") closeModal(); });
+
+    // Logout
+    const logoutBtn = $("#logoutBtn");
+    const logoutModal = $("#logoutModal");
+    const cancelLogoutBtn = $("#cancelLogoutBtn");
+    const confirmLogoutBtn = $("#confirmLogoutBtn");
+
+    function openLogoutModal(){ logoutModal.classList.add("show"); }
+    function closeLogoutModal(){ logoutModal.classList.remove("show"); }
+
+    logoutBtn.onclick = openLogoutModal;
+    cancelLogoutBtn.onclick = closeLogoutModal;
+
+    confirmLogoutBtn.onclick = ()=>{
+      closeLogoutModal();
+      setLoggedIn(false);
+      introPage.style.display = "flex";
+      authContainer.style.display = "none";
+      mainApp.style.display = "none";
+      switchToLogin();
+      document.getElementById("loginPassword").value = "";
+      alert("You have been logged out successfully.");
+    };
+
+    logoutModal.addEventListener("click", e=>{
+      if(e.target === logoutModal) closeLogoutModal();
+    });
+
+    document.addEventListener("keydown", e=>{
+      if(e.key === "Escape"){
+        if(logoutModal.classList.contains("show")) closeLogoutModal();
+        if($("#modal").classList.contains("show")) closeModal();
+      }
+    });
+
+    // Init
+    $("#userName").textContent = state.user.name;
+    set2faUI();
+    renderStats();
+    renderApps();
+    renderCalendar();
+    renderNotes();
+    bootstrapAuth();
+  </script>
+</body>
+</html>
